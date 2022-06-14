@@ -1531,8 +1531,27 @@ async def test_entity_media_states(hass: HomeAssistant, app_id, state_no_media):
     state = hass.states.get(entity_id)
     assert state.state == state_no_media
 
-    # App no longer running
+    # App no longer running, but device not in stand by
     chromecast.app_id = pychromecast.IDLE_APP_ID
+    chromecast.status.is_stand_by = False
+    cast_status = MagicMock()
+    cast_status_cb(cast_status)
+    await hass.async_block_till_done()
+    state = hass.states.get(entity_id)
+    assert state.state == "idle"
+
+    # App no longer running and stand by not supported
+    chromecast.app_id = pychromecast.IDLE_APP_ID
+    chromecast.status.is_stand_by = None
+    cast_status = MagicMock()
+    cast_status_cb(cast_status)
+    await hass.async_block_till_done()
+    state = hass.states.get(entity_id)
+    assert state.state == "off"
+
+    # Device in stand by
+    chromecast.app_id = pychromecast.IDLE_APP_ID
+    chromecast.status.is_stand_by = True
     cast_status = MagicMock()
     cast_status_cb(cast_status)
     await hass.async_block_till_done()

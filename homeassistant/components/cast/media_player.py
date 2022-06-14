@@ -761,6 +761,8 @@ class CastMediaPlayerEntity(CastDevice, MediaPlayerEntity):
                 return STATE_PLAYING
             return STATE_IDLE
         if self._chromecast is not None and self._chromecast.is_idle:
+            if self._chromecast.status and self._chromecast.status.is_stand_by is False:
+                return STATE_IDLE
             return STATE_OFF
         return None
 
